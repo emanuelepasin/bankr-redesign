@@ -1,0 +1,429 @@
+/* @link https://utopia.fyi/type/calculator?c=320,20,1.2,1240,24,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l&g=s,l,xl,12 */
+
+:root {
+    --step--2: clamp(0.8681rem, 0.8361rem + 0.1599vw, 0.96rem);
+    --step--1: clamp(1.0417rem, 0.9866rem + 0.2754vw, 1.2rem);
+    --step-0: clamp(1.25rem, 1.163rem + 0.4348vw, 1.5rem);
+    --step-1: clamp(1.5rem, 1.3696rem + 0.6522vw, 1.875rem);
+    --step-2: clamp(1.8rem, 1.6109rem + 0.9457vw, 2.3438rem);
+    --step-3: clamp(2.16rem, 1.8923rem + 1.3386vw, 2.9297rem);
+    --step-4: clamp(2.592rem, 2.2198rem + 1.8611vw, 3.6621rem);
+    --step-5: clamp(3.1104rem, 2.6001rem + 2.5517vw, 4.5776rem);
+    
+    /* CRT monitor colors */
+    --crt-text-color: rgba(210, 126, 72, 1);
+    --crt-background: rgba(10, 10, 10, 1);
+    --bezel-gradient-start: #333;
+    --bezel-gradient-end: #222;
+    --plastic-case-color: #444;
+  }
+
+@font-face {
+    font-family: 'UncutPlan8';
+    src: url('fonts/UncutPlan8-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'UncutPlan8', monospace;
+    background-color: #111;
+    color: var(--crt-text-color);
+    line-height: 1.4;
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.monitor-case {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--plastic-case-color);
+    padding: 15px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+}
+
+.monitor-bezel {
+    border-radius: 24px;
+    background: linear-gradient(to bottom, var(--bezel-gradient-start), var(--bezel-gradient-end));
+    height: 100%;
+    padding: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.monitor-screen {
+    position: relative;
+    background: radial-gradient(
+        circle at center,
+        rgba(25, 15, 10, 1) 0%,
+        rgba(15, 10, 8, 1) 50%,
+        rgba(10, 10, 10, 1) 100%
+    );
+    height: 100%;
+    overflow: auto;
+    padding: 30px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    border-radius: 22px;
+    animation: flicker 5s infinite;
+}
+
+.monitor-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        /* Enhanced horizontal scan lines */
+        repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        ),
+        /* Additional subtle horizontal lines at different scale */
+        repeating-linear-gradient(
+            0deg,
+            rgba(210, 126, 72, 0.03),
+            rgba(210, 126, 72, 0.03) 1px,
+            transparent 1px,
+            transparent 6px
+        ),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    animation: scanLine 8s linear infinite;
+}
+
+.monitor-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(
+            circle at center,
+            rgba(210, 126, 72, 0.05) 0%,
+            rgba(210, 126, 72, 0.03) 40%,
+            rgba(210, 126, 72, 0.01) 80%,
+            transparent 100%
+        ),
+        /* Very subtle scan line glow effect */
+        repeating-linear-gradient(
+            0deg,
+            rgba(210, 126, 72, 0.02),
+            rgba(210, 126, 72, 0.02) 1px,
+            transparent 1px,
+            transparent 4px
+        );
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+.screen-content {
+    position: relative;
+    z-index: 1;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen-content-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+}
+
+/* Vintage scrollbar styling */
+.screen-content-inner::-webkit-scrollbar {
+    width: 15px;
+    background: rgba(30, 20, 15, 0.5);
+}
+
+.screen-content-inner::-webkit-scrollbar-thumb {
+    background: rgba(210, 126, 72, 0.8);
+    border: 2px solid rgba(30, 20, 15, 0.8);
+    box-shadow: 0 0 10px rgba(210, 126, 72, 0.5);
+}
+
+.screen-content-inner::-webkit-scrollbar-track {
+    background: rgba(30, 20, 15, 0.8);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Firefox scrollbar */
+.screen-content-inner {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(210, 126, 72, 0.8) rgba(30, 20, 15, 0.8);
+}
+
+/* Text styling with multiple drop shadows */
+.screen-content p, .screen-content h1, .screen-content div {
+    text-shadow: 0px 0px 12px rgba(210, 126, 72, 0.6);
+    color: var(--crt-text-color);
+}
+
+.screen-content::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: 0px 0px 100px 0px rgba(210, 125, 73, 0.8);
+    pointer-events: none;
+    z-index: -1;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding: 20px 0;
+}
+
+.logo img {
+    width: 140px;
+    height: auto;
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+    padding-left: 20px;
+}
+
+a {
+    color: var(--crt-text-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    transition: text-decoration 0.3s ease;
+}
+
+.title {
+    font-size: var(--step-1);
+    margin-bottom: 30px;
+}
+
+.highlight-box {
+    width: fit-content;
+    border: calc(var(--step-0) * .1) solid var(--crt-text-color);
+    padding: 15px;
+    margin-bottom: 30px;
+    display: inline-block;
+    box-shadow: 0px 0px 20px 0px rgba(210, 125, 73, 0.2);
+}
+
+.highlight-box p {
+    font-size: var(--step-0);
+}
+
+.description {
+    font-size: var(--step-0);
+    margin-bottom: 50px;
+    max-width: 90%;
+}
+
+.social-links {
+    margin-bottom: 40px;
+}
+
+.social-links p {
+    margin-bottom: 10px;
+    font-size: var(--step--1);
+}
+
+.contract-info a {
+    font-size: var(--step--2);
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;  
+}
+
+.menu {
+    margin-bottom: 30px;
+    font-size: var(--step-0);
+}
+
+/* Menu item hover effect - full line highlight */
+a {
+    display: block;
+    padding: 5px 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    text-decoration: none;
+    background-color: rgba(210, 126, 72, 0.8);
+    color: var(--crt-background);
+    box-shadow: 0 0 15px rgba(210, 126, 72, 0.4);
+    text-shadow: none;
+}
+
+/* Add selection arrow/indicator for menu items */
+a:hover::before {
+    content: ">";
+    position: absolute;
+    left: 0;
+    transform: translateX(-100%);
+}
+
+.more-info p {
+    margin-bottom: 10px;
+}
+
+.footer {
+    border-top: calc(var(--step-0) * .1) solid var(--crt-text-color);
+    margin-top: 40px;
+    margin-bottom: 40px;
+    padding-top: 20px;
+    font-size: var(--step--2);
+}
+
+/* Add CRT flicker effect */
+@keyframes flicker {
+    0% {
+        opacity: 0.97;
+    }
+    5% {
+        opacity: 0.9;
+    }
+    10% {
+        opacity: 0.97;
+    }
+    15% {
+        opacity: 0.94;
+    }
+    20% {
+        opacity: 0.98;
+    }
+    50% {
+        opacity: 0.94;
+    }
+    80% {
+        opacity: 0.98;
+    }
+    90% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 0.98;
+    }
+}
+
+/* Make sure the website is responsive */
+@media (max-width: 768px) {
+    .nav {
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .title {
+        font-size: var(--step-1);
+    }
+    
+    .highlight-box {
+        width: 100%;
+    }
+    
+    .description {
+        max-width: 100%;
+    }
+
+    .monitor-case {
+        padding: 10px;
+    }
+
+    .monitor-screen {
+        padding: 15px;
+    }
+}
+
+/* Hide scrollbar but keep functionality */
+.monitor-screen::-webkit-scrollbar {
+    display: none;
+}
+
+.monitor-screen {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+}
+
+@keyframes scanLine {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 1000px;
+    }
+}
+
+/* Blinking cursor animation */
+.cursor {
+  color: rgba(210, 126, 72, 1);
+  font-weight: bold;
+  animation: blink 1s step-end infinite;
+  margin-left: 4px;
+}
+
+/* Replace the current hover rule with this parent hover selector */
+a:hover .cursor {
+    color: var(--crt-background);
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Blinking dot animation */
+@keyframes blink-animation {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.blink-dot {
+  animation: blink-animation 1.2s infinite;
+  display: inline-block;
+  color: rgba(210, 126, 72, 1);
+  text-shadow: 0px 0px 12px rgba(210, 126, 72, 0.6),
+               0px 0px 100px rgba(210, 125, 73, 0.8);
+}
